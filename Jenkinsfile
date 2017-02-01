@@ -6,7 +6,7 @@ node {
     stage('Checkout'){
         deleteDir()
         echo "Checkout git"
-        checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, submoduleCfg: [], userRemoteConfigs: [[url: 'ssh://git@github.com:MaxxtonGroup/microdocs-cli.git', branch: 'master', credentialsId: '12345-1234-4696-af25-123455']]])
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/MaxxtonGroup/microdocs-cli', branch: 'master']]])
         stash name: 'src'
     }
     stage('Build'){
@@ -33,10 +33,10 @@ node {
         }
     }
 
-    stage('Git Tag'){
-        sh 'git push'
-        sh 'git push origin ' + projectName + '_' + newVersion
-    }
+//    stage('Git Tag'){
+//        sh 'git push'
+//        sh 'git push origin ' + projectName + '_' + newVersion
+//    }
 
     stage('Publish'){
         dir('dist'){
