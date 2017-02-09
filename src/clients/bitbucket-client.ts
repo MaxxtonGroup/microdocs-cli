@@ -60,7 +60,8 @@ export class BitBucketClient {
               }
               return msg;
             }).join('\n');
-            let promise = this.postPullRequestComment(client, details, comment, file, line);
+            let lineNumber:number = parseInt(line);
+            let promise = this.postPullRequestComment(client, details, comment, file, lineNumber);
             promissen.push(new Promise((resolve:()=>void,reject:(err?:any) => void) => {
               promise.then((commentId:number) => {
                 Promise.all(problemList.map(problem => {

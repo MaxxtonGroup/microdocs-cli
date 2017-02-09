@@ -1,4 +1,5 @@
 import { Command } from 'command-script';
+import { SchemaHelper } from "@maxxton/microdocs-core/helpers";
 
 export default new Command( "build" )
     .description( "Build a MicroDocs definitions from source files" )
@@ -6,6 +7,7 @@ export default new Command( "build" )
     .option( '-t, --patterns <PATTERNS>', { desc: 'patterns to match source files',value: '/**/*.ts,!/**/*.spec.ts',parser: Command.list } )
     .option( '-c, --tsconfig <FILE>', { desc: 'Set the location of the tsconfig.json', value: 'tsconfig.json' } )
     .option( '-d, --definitionFile <FILE>', {desc: 'Set where to store the MicroDocs definitions file',value: 'microdocs.json'} )
+    .option( '-i, --inject <PROPERTIES>', {desc: 'Inject properties into the defintion', parser: Command.list } )
     .flag( '--no-cache', { desc: 'Ignore cached definition file' } )
     .flag( '--no-build', { desc: 'Prevent building the definition' } )
     .action( ( args: { args?: any[], options?: any, flags?: any }, resolve: ( result?: any ) => void, reject: ( err?: any ) => void ) => {
@@ -19,11 +21,12 @@ export default new Command( "build" )
         filePatterns: args.options.patterns,
         tsConfig: args.options.tsconfig,
         definitionFile: args.options.definitionFile,
+        injects: args.options.inject,
         noCache: args.flags[ 'no-cache' ],
         noBuild: args.flags[ 'no-build' ]
       } ).then( ( project: any ) => {
         logger.info( "Build definitions succeed" );
-        resolve( project );
+        resolve( {project: project} );
       }, ( err: any ) => {
         reject( err );
       } );
