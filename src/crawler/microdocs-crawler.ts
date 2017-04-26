@@ -60,7 +60,7 @@ export class MicroDocsCrawler {
         }
 
         let sourceFiles: string[] = this.getSourceFiles( source, filePatterns );
-        if ( sourceFiles.length == 0 ) {
+        if ( sourceFiles.length == 0 && !noBuild ) {
           let error: Error = new CrawlerException( `No sources found in '${source}' which matches '${filePatterns}'` );
           reject( error );
           return;
@@ -70,7 +70,7 @@ export class MicroDocsCrawler {
         if ( definitionFile && fs.existsSync( definitionFile ) && !noCache ) {
           if ( noBuild ) {
             try {
-              let project: Project = <Project>require( definitionFile );
+              let project: Project = <Project>require(pathUtil.join(process.cwd(), definitionFile ));
               this.logger.info( "Skip building the MicroDocs definitions, use the '--no-cache' option to enforce this" );
               resolveMapper( project );
               return;
@@ -84,7 +84,7 @@ export class MicroDocsCrawler {
             hasher( { include: sourceFiles, filenames: true } ).then( ( newHash: any ) => {
               if ( newHash === hash.toString() ) {
                 try {
-                  let project: Project = <Project>require( definitionFile );
+                  let project: Project = <Project>require(pathUtil.join(process.cwd(), definitionFile ));
                   this.logger.info( "Skip building the MicroDocs definitions, use the '--no-cache' option to enforce this" );
                   resolveMapper( project );
                   return;
