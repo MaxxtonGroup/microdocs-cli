@@ -1,23 +1,15 @@
 import { Project, ProblemResponse, ProblemLevels } from '@maxxton/microdocs-core/domain';
 import { ProjectBuilder } from '@maxxton/microdocs-core/builder/index';
-import { Application } from "@maxxton/typedoc";
 import * as fs from 'fs';
 import * as pathUtil from 'path';
 
-import { RootCrawler } from "./common/root.crawler";
 import { CrawlerException } from "./common/crawler.exception";
 import { Framework, FRAMEWORKS } from "./frameworks";
 import { CheckOptions } from "../options/check.options";
 import { MicroDocsClient } from "../clients/microdocs-client";
-import * as cliHelper from '../helpers/cli.helper';
 import { PublishOptions } from "../options/publish.options";
-import { Logger } from '../helpers/logging/logger';
 import { ServerOptions } from "../options/server.options";
-import { BitBucketClient } from "../clients/bitbucket-client";
-const mkdirp = require('mkdirp');
-const hasher = require( 'glob-hash' );
-const globby = require( 'globby' );
-const Preferences = require("preferences");
+import { Logger } from '../helpers/logging/logger';
 
 /**
  * Base crawler to crawl Typescript sources
@@ -36,7 +28,7 @@ export class MicroDocsCrawler {
    * @param callback
    * @return {Project}
    */
-  public build( options: { source?: string, filePatterns?: string[], tsConfig?: string, definitionFile?: string, noCache?: boolean, noBuild?: boolean } ): Promise<Project> {
+  public build( options: { source?: string, filePatterns?: string[], tsConfig?: string, definitionFile?: string, noCache?: boolean, noBuild?: boolean, injects?: string[] } ): Promise<Project> {
     return new Promise<Project>( ( resolve: ( project: Project ) => void, reject: ( err: any ) => void ) => {
       try {
         let source         = pathUtil.resolve( (options && options.source) || process.cwd() );
@@ -45,6 +37,21 @@ export class MicroDocsCrawler {
         let definitionFile = (options && options.definitionFile) || 'microdocs.json';
         let noCache        = (options && options.noCache) || false;
         let noBuild        = (options && options.noBuild) || false;
+        let injects        = (options && options.injects) || [];
+
+        let resolveMapper = (project:Project) => {
+          const SchemaHelper = require('@maxxton/microdocs-core/helpers/schema/schema.helper').SchemaHelper;
+          if(injects){
+            injects.filter(inject => inject.split('=').length >= 2).forEach(inject => {
+              let slices = inject.split('=');
+              let key = slices[0];
+              let value = slices.slice(1, slices.length).join('=');
+              let evalValue = eval(value);
+              project = SchemaHelper.setProperty(project, key, evalValue);
+            });
+          }
+          resolve(project);
+        };
 
         if ( noCache && noBuild ) {
           let error = new Error( "'no build' and 'no cache' cannot be used at the same time" );
@@ -65,26 +72,27 @@ export class MicroDocsCrawler {
             try {
               let project: Project = <Project>require( definitionFile );
               this.logger.info( "Skip building the MicroDocs definitions, use the '--no-cache' option to enforce this" );
-              resolve( project );
+              resolveMapper( project );
               return;
             } catch ( e ) {
               let error = new Error( `Definition file could not be loaded from '${definitionFile}'` );
               reject( error );
             }
           } else if ( hashFile && fs.existsSync( hashFile ) ) {
-            let hash = fs.readFileSync( hashFile );
+            let hash     = fs.readFileSync( hashFile );
+            const hasher = require( 'glob-hash' );
             hasher( { include: sourceFiles, filenames: true } ).then( ( newHash: any ) => {
               if ( newHash === hash.toString() ) {
                 try {
                   let project: Project = <Project>require( definitionFile );
                   this.logger.info( "Skip building the MicroDocs definitions, use the '--no-cache' option to enforce this" );
-                  resolve( project );
+                  resolveMapper( project );
                   return;
                 } catch ( e ) {
                   this.logger.warn( `Failed to load cached definitions from '${definitionFile}', rebuilding definitions...` );
                 }
               }
-              this.buildDefinition( source, sourceFiles, tsConfigFile, definitionFile, newHash.hash )
+              this.buildDefinition( source, sourceFiles, tsConfigFile, definitionFile, injects, newHash.hash )
                   .then( ( project: Project ) => resolve( project ), ( error: any ) => reject( error ) );
             }, ( err: any ) => {
               reject( err );
@@ -95,8 +103,8 @@ export class MicroDocsCrawler {
           throw new Error("No definition file provided, use the '--definitionFile' option for this");
         }
 
-        this.buildDefinition( source, sourceFiles, tsConfigFile, definitionFile )
-            .then( ( project: Project ) => resolve( project ), ( error: any ) => reject( error ) );
+        this.buildDefinition( source, sourceFiles, tsConfigFile, definitionFile, injects )
+            .then( ( project: Project ) => resolveMapper( project ), ( error: any ) => reject( error ) );
       } catch ( e ) {
         reject( e );
       }
@@ -113,7 +121,7 @@ export class MicroDocsCrawler {
    * @param hash
    * @return {Promise<Project>}
    */
-  private buildDefinition( source: string, sourceFiles: string[], tsConfigFile: string, definitionFile: string, hash?: string ): Promise<Project> {
+  private buildDefinition( source: string, sourceFiles: string[], tsConfigFile: string, definitionFile: string, injects:string[], hash?: string ): Promise<Project> {
     return new Promise<Project>( ( resolve: ( project: Project ) => void, reject: ( err: any ) => void ) => {
       try {
 
@@ -129,11 +137,23 @@ export class MicroDocsCrawler {
 
         let project: Project = this.buildProject( sourceFiles, tsConfig );
 
+        const SchemaHelper = require('@maxxton/microdocs-core/helpers/schema/schema.helper').SchemaHelper;
+        if(injects){
+          injects.filter(inject => inject.split('=').length >= 2).forEach(inject => {
+            let slices = inject.split('=');
+            let key = slices[0];
+            let value = slices.slice(1, slices.length).join('=');
+            let evalValue = eval(value);
+            project = SchemaHelper.setProperty(project, key, evalValue);
+          });
+        }
+
         if ( definitionFile ) {
           this.logger.info( `Store definitions in '${definitionFile}'` );
           let hashFile         = definitionFile + '.hash';
           let json             = JSON.stringify( project );
           let definitionFolder = pathUtil.dirname( definitionFile );
+          const mkdirp         = require( 'mkdirp' );
           mkdirp.sync( definitionFolder );
           if ( hash ) {
             fs.writeFileSync( hashFile, hash );
@@ -147,6 +167,7 @@ export class MicroDocsCrawler {
               throw e;
             }
           } else {
+            const hasher = require( 'glob-hash' );
             hasher( { include: sourceFiles, filenames: true } ).then( ( newHash: any ) => {
               try {
                 fs.writeFileSync( hashFile, newHash );
@@ -184,6 +205,9 @@ export class MicroDocsCrawler {
    * @returns {Project} MicroDocs definition
    */
   private buildProject( sources: string[], tsConfig: {} = {}, frameworks: Framework[] = FRAMEWORKS ): Project {
+    const Application = require( "@maxxton/typedoc" ).Application;
+    const RootCrawler = require( "./common/root.crawler" ).RootCrawler;
+
     // Check frameworks
     if ( frameworks.length == 0 ) {
       throw new CrawlerException( 'No framework selected' );
@@ -192,21 +216,21 @@ export class MicroDocsCrawler {
     // Convert source to reflection
     this.logger.info( 'Crawl sources with config:' );
     this.logger.info( JSON.stringify( tsConfig, undefined, 2 ) );
-    var typedocApplication = new Application( tsConfig );
-    var reflect            = typedocApplication.convert( sources );
+    let typedocApplication = new Application( tsConfig );
+    let reflect            = typedocApplication.convert( sources );
 
     if ( !reflect ) {
       throw new Error( "Compiling failed" );
     }
 
     // Init Crawling
-    var rootCrawler = new RootCrawler();
+    let rootCrawler = new RootCrawler();
     frameworks.forEach( framework => {
       framework.initCrawlers().forEach( crawler => rootCrawler.registerCrawler( crawler ) );
     } );
 
     // Start Crawling
-    var projectBuilder = new ProjectBuilder();
+    let projectBuilder = new ProjectBuilder();
     rootCrawler.crawl( projectBuilder, reflect );
 
     return projectBuilder.build();
@@ -218,11 +242,12 @@ export class MicroDocsCrawler {
    * @return {Promise<ServerOptions>}
    */
   public login( options: { url?: string, username?: string, password?: string, noCredentialStore?: boolean, noChecking?: boolean } ): Promise<ServerOptions> {
-    return new Promise( ( resolve: (result:ServerOptions) => void, reject: ( err?: any ) => void ) => {
+    return new Promise( ( resolve: ( result: ServerOptions ) => void, reject: ( err?: any ) => void ) => {
       try {
+        const Preferences                = require( "preferences" );
         const prefs                      = new Preferences( 'microdocs', {
           server: {
-            url: 'http://localhost',
+            url: 'http://localhost:3000',
             username: '',
             password: ''
           }
@@ -242,57 +267,61 @@ export class MicroDocsCrawler {
             resolve( serverOptions );
           } else {
             prefs.server = serverOptions;
-            prefs.save();
             resolve( serverOptions );
           }
         } else {
-          new MicroDocsClient(this.logger).login( serverOptions ).then( () => {
-            if ( noCredentialStore ) {
-              resolve( serverOptions );
-            } else {
-              prefs.server = serverOptions;
-              prefs.save();
-              resolve( serverOptions );
+          new MicroDocsClient( this.logger ).login( serverOptions ).then( () => {
+            try {
+              if ( noCredentialStore ) {
+                resolve( serverOptions );
+              } else {
+                prefs.server = serverOptions;
+                resolve( serverOptions );
+              }
+            } catch ( e ) {
+              reject( e );
             }
           }, reject );
         }
-      }catch(e){
-        reject(e);
+      } catch ( e ) {
+        reject( e );
       }
     } );
   }
 
-  public check(project:Project, checkOptions:CheckOptions):Promise<ProblemResponse>{
+  public check( project: Project, checkOptions: CheckOptions ): Promise<ProblemResponse> {
     return new Promise( ( resolve: ( result: ProblemResponse ) => void, reject: ( err?: any ) => void ) => {
-      let microDocsClient = new MicroDocsClient(this.logger);
-      microDocsClient.check( checkOptions, project ).then((problemResponse:ProblemResponse) => {
-        if(checkOptions.bitBucketPullRequestUrl){
-          this.publishToBitBucket(checkOptions, problemResponse).then(resolve, reject);
-        }else{
-          resolve(problemResponse);
+      let microDocsClient = new MicroDocsClient( this.logger );
+      microDocsClient.check( checkOptions, project ).then( ( problemResponse: ProblemResponse ) => {
+        if ( checkOptions.bitBucketPullRequestUrl ) {
+          this.publishToBitBucket( checkOptions, problemResponse ).then( resolve, reject );
+        } else {
+          resolve( problemResponse );
         }
-      }, reject);
-    });
+      }, reject );
+    } );
   }
 
-  public publish(project:Project, publishOptions:PublishOptions):Promise<ProblemResponse>{
+  public publish( project: Project, publishOptions: PublishOptions ): Promise<ProblemResponse> {
     return new Promise( ( resolve: ( result: ProblemResponse ) => void, reject: ( err?: any ) => void ) => {
-      let microDocsClient = new MicroDocsClient(this.logger);
-      microDocsClient.publish( publishOptions, project ).then((problemResponse:ProblemResponse) => {
-        if(publishOptions.bitBucketPullRequestUrl){
-          this.publishToBitBucket(publishOptions, problemResponse).then(resolve, reject);
-        }else{
-          resolve(problemResponse);
+      let microDocsClient = new MicroDocsClient( this.logger );
+      microDocsClient.publish( publishOptions, project ).then( ( problemResponse: ProblemResponse ) => {
+        if ( publishOptions.bitBucketPullRequestUrl ) {
+          this.publishToBitBucket( publishOptions, problemResponse ).then( resolve, reject );
+        } else {
+          resolve( problemResponse );
         }
-      }, reject);
-    });
+      }, reject );
+    } );
   }
 
-  private publishToBitBucket(checkOptions:CheckOptions, problemResponse:ProblemResponse):Promise<ProblemResponse>{
-    return new BitBucketClient(this.logger).publishToBitBucket(checkOptions, problemResponse);
+  private publishToBitBucket( checkOptions: CheckOptions, problemResponse: ProblemResponse ): Promise<ProblemResponse> {
+    const BitBucketClient = require( "../clients/bitbucket-client" ).BitBucketClient;
+    return new BitBucketClient( this.logger ).publishToBitBucket( checkOptions, problemResponse );
   }
 
   private getSourceFiles( sourceFolder: string, filePatterns: string[] ): string[] {
+    const globby = require( 'globby' );
     return globby[ 'sync' ]( filePatterns.map( pattern => {
       if ( pattern.indexOf( '!' ) === 0 ) {
         return '!' + pathUtil.join( sourceFolder, pattern.substring( 1 ) );

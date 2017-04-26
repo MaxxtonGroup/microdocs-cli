@@ -1,4 +1,5 @@
 import { Command } from 'command-script';
+import { ServerOptions } from "../options/server.options";
 
 export default new Command( "login" )
     .description("Login to a MicroDocs Server")
@@ -15,15 +16,15 @@ export default new Command( "login" )
         let crawler = new MicroDocsCrawler( logger );
 
         crawler.login({
-            url: args.options.login,
+            url: args.options.url,
             username: args.options.username,
             password: args.options.password,
             noCredentialStore: args.flags['no-credentials-store'],
             noChecking: args.flags['no-checking']
-        }).then((loggedIn:boolean) => {
+        }).then((serverOptions:ServerOptions) => {
             if(!args.flags['no-checking']){
                 logger.info('Logged in!');
             }
-            resolve();
+            resolve({server: serverOptions});
         }, reject);
     } );

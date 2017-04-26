@@ -33,7 +33,17 @@ export class MicroDocsClient {
     return new Promise( ( resolve: ( loggedIn: boolean ) => void, reject: ( err?: any ) => void ) => {
       let client: any = this.createClient( serverOptions, reject );
       this.logger.info('GET ' + serverOptions.url);
-      client.get( serverOptions.url, ( data: ProblemResponse, response: any ) => {
+      client.get( serverOptions.url, {
+        requestConfig: {
+          timeout: 1000, //request timeout in milliseconds
+          noDelay: true, //Enable/disable the Nagle algorithm
+          keepAlive: true, //Enable/disable keep-alive functionalityidle socket.
+          keepAliveDelay: 1000 //and optionally set the initial delay before the first keepalive probe is sent
+        },
+        responseConfig: {
+          timeout: 1000 //response timeout
+        }
+      }, ( data: ProblemResponse, response: any ) => {
         this.logger.debug('Response: ' + response.statusCode);
         if ( response.statusCode == 200 ) {
           resolve( true );
@@ -55,33 +65,33 @@ export class MicroDocsClient {
   public check( checkOptions: CheckOptions, project: Project ): Promise<ProblemResponse> {
     return new Promise( ( resolve: ( result: ProblemResponse ) => void, reject: ( err?: any ) => void ) => {
       try {
-        var errorHandler = ( error: any ) => {
-          var message = "Failed to post to " + url + " (" + error + ")";
+        let errorHandler = ( error: any ) => {
+          let message = "Failed to post to " + url + " (" + error + ")";
           resolve( { message: message, status: 'failed' } );
         };
 
-        var client: any = this.createClient( checkOptions, errorHandler );
+        let client: any = this.createClient( checkOptions, errorHandler );
 
-        var params: any = {};
+        let params: any = {};
         if ( checkOptions.title ) {
           params[ 'title' ] = checkOptions.title;
         }
         if ( checkOptions.env ) {
           params[ 'env' ] = checkOptions.env;
         }
-        var options = {
+        let options = {
           parameters: params,
           headers: { 'content-type': 'application/json' },
           data: JSON.stringify( project )
         };
-        var url     = checkOptions.url + '/api/v1/check';
+        let url     = checkOptions.url + '/api/v1/check';
         this.logger.info('post ' + url);
 
         client.post( url, options, ( data: ProblemResponse, response: any ) => {
           if ( response.statusCode == 200 ) {
             resolve( data );
           } else {
-            var message = "Wrong response status " + response.statusCode + ", expected 200 -> body:\n " + data.toString();
+            let message = "Wrong response status " + response.statusCode + ", expected 200 -> body:\n " + JSON.stringify(data);
             resolve( { message: message, status: 'failed' } );
           }
         } ).on( 'error', errorHandler );
@@ -132,7 +142,7 @@ export class MicroDocsClient {
           if ( response.statusCode == 200 ) {
             resolve( data );
           } else {
-            var message = "Wrong response status " + response.statusCode + ", expected 200 -> body:\n " + data.toString();
+            var message = "Wrong response status " + response.statusCode + ", expected 200 -> body:\n " + JSON.stringify(data);
             resolve( { message: message, status: 'failed' } );
           }
         } ).on( 'error', errorHandler );
@@ -178,9 +188,9 @@ export class MicroDocsClient {
 
     client.get( url, options, ( data: string, response: any ) => {
       if ( response.statusCode == 200 ) {
-        callback( data.toString() );
+        callback( JSON.stringify(data));
       } else {
-        var message = "Wrong response status " + response.statusCode + ", expected 200 -> body:\n " + data.toString();
+        var message = "Wrong response status " + response.statusCode + ", expected 200 -> body:\n " + JSON.stringify(data);
         callback( { message: message, status: 'failed' } );
       }
     } ).on( 'error', errorHandler );

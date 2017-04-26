@@ -17,6 +17,7 @@ let cli = new Cli({
 
 cli.command(require('./cli.build'));
 cli.command(require('./cli.check'));
+cli.command(require('./cli.publish'));
 cli.command(require('./cli.login'));
 
 cli.command('help')
