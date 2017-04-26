@@ -20,7 +20,7 @@
     "mdocs": "cli/cli.js"
   },
   "dependencies": {
-    "@maxxton/microdocs-core": "1.6.11",
+    "@maxxton/microdocs-core": "1.7.3",
     "@maxxton/typedoc": "^0.5.5",
     "command-script": "1.0.0",
     "chai": "^3.5.0",

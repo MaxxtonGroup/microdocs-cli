@@ -68,7 +68,7 @@ export class MicroDocsCrawler {
               resolve( project );
               return;
             } catch ( e ) {
-              let error = new Error( `Definition file could not be loaded from '$(outputFile}'` );
+              let error = new Error( `Definition file could not be loaded from '${definitionFile}'` );
               reject( error );
             }
           } else if ( hashFile && fs.existsSync( hashFile ) ) {
@@ -91,6 +91,8 @@ export class MicroDocsCrawler {
             } );
             return;
           }
+        }else if(noBuild){
+          throw new Error("No definition file provided, use the '--definitionFile' option for this");
         }
 
         this.buildDefinition( source, sourceFiles, tsConfigFile, definitionFile )
