@@ -1,9 +1,17 @@
 #!/usr/bin/env node
 
 import {Cli} from 'command-script';
-var packageJson:any = require('../../package.json');
+import * as fs from 'fs';
 
-var cli = new Cli({
+// Load package json
+let packageJson: any;
+if(fs.existsSync('../package.json')) {
+  packageJson = require('../package.json');
+}else{
+  packageJson = require('../../package.json');
+}
+
+let cli = new Cli({
   packageJson: packageJson
 });
 

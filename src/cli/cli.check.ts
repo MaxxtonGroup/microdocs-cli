@@ -29,11 +29,14 @@ module.exports = new Command( "check" )
       }
       let checkOptions: CheckOptions = Object.assign( serverOptions, {
         title: args.options.title,
-        env: args.options.env
+        env: args.options.env,
+        bitBucketPullRequestUrl: args.options['bitbucket-pr-url'],
+        bitBucketUsername: args.options['bitbucket-username'],
+        bitBucketPassword: args.options['bitbucket-password']
       } );
       let crawler                    = new MicroDocsCrawler( logger );
       crawler.check( project, checkOptions ).then( ( problemResult: ProblemResponse ) => {
-        cliHelper.printProblemResponse( problemResult, args.options.source, logger );
+        cliHelper.printProblemResponse( problemResult, [args.options.source], logger );
         resolve();
       }, reject );
     } );
