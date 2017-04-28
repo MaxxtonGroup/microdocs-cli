@@ -35,6 +35,7 @@ export class MicroDocsCrawler {
         let filePatterns   = (options && options.filePatterns) || [ '/**/*.ts', '!/**/*.spec.ts' ];
         let tsConfigFile   = (options && options.tsConfig) || 'tsconfig.json';
         let definitionFile = (options && options.definitionFile) || 'microdocs.json';
+        let absoluteDefinitionFile = pathUtil.resolve(process.cwd(), definitionFile);
         let noCache        = (options && options.noCache) || false;
         let noBuild        = (options && options.noBuild) || false;
         let injects        = (options && options.injects) || [];
@@ -66,16 +67,16 @@ export class MicroDocsCrawler {
           return;
         }
 
-        let hashFile: string = definitionFile + '.hash';
-        if ( definitionFile && fs.existsSync( definitionFile ) && !noCache ) {
+        let hashFile: string = absoluteDefinitionFile + '.hash';
+        if ( absoluteDefinitionFile && fs.existsSync( absoluteDefinitionFile ) && !noCache ) {
           if ( noBuild ) {
             try {
-              let project: Project = <Project>require(pathUtil.join(process.cwd(), definitionFile ));
+              let project:Project = <Project>JSON.parse(<any>fs.readFileSync(absoluteDefinitionFile))
               this.logger.info( "Skip building the MicroDocs definitions, use the '--no-cache' option to enforce this" );
               resolveMapper( project );
               return;
             } catch ( e ) {
-              let error = new Error( `Definition file could not be loaded from '${definitionFile}'` );
+              let error = new Error( `Definition file could not be loaded from '${absoluteDefinitionFile}'` );
               reject( error );
             }
           } else if ( hashFile && fs.existsSync( hashFile ) ) {
@@ -84,15 +85,15 @@ export class MicroDocsCrawler {
             hasher( { include: sourceFiles, filenames: true } ).then( ( newHash: any ) => {
               if ( newHash === hash.toString() ) {
                 try {
-                  let project: Project = <Project>require(pathUtil.join(process.cwd(), definitionFile ));
+                  let project:Project = <Project>JSON.parse(<any>fs.readFileSync(absoluteDefinitionFile))
                   this.logger.info( "Skip building the MicroDocs definitions, use the '--no-cache' option to enforce this" );
                   resolveMapper( project );
                   return;
                 } catch ( e ) {
-                  this.logger.warn( `Failed to load cached definitions from '${definitionFile}', rebuilding definitions...` );
+                  this.logger.warn( `Failed to load cached definitions from '${absoluteDefinitionFile}', rebuilding definitions...` );
                 }
               }
-              this.buildDefinition( source, sourceFiles, tsConfigFile, definitionFile, injects, newHash.hash )
+              this.buildDefinition( source, sourceFiles, tsConfigFile, absoluteDefinitionFile, injects, newHash.hash )
                   .then( ( project: Project ) => resolve( project ), ( error: any ) => reject( error ) );
             }, ( err: any ) => {
               reject( err );
@@ -103,7 +104,7 @@ export class MicroDocsCrawler {
           throw new Error("No definition file provided, use the '--definitionFile' option for this");
         }
 
-        this.buildDefinition( source, sourceFiles, tsConfigFile, definitionFile, injects )
+        this.buildDefinition( source, sourceFiles, tsConfigFile, absoluteDefinitionFile, injects )
             .then( ( project: Project ) => resolveMapper( project ), ( error: any ) => reject( error ) );
       } catch ( e ) {
         reject( e );
