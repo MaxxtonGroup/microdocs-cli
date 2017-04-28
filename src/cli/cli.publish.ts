@@ -37,7 +37,7 @@ module.exports = new Command("publish")
       });
       let crawler = new MicroDocsCrawler( logger );
       crawler.publish(project, publishOptions).then((problemResult:ProblemResponse) => {
-        cliHelper.printProblemResponse( problemResult, args.options.source, logger);
+        cliHelper.printProblemResponse( problemResult, [args.options.source], logger);
         resolve();
       }, reject);
     } );

@@ -42,7 +42,7 @@ export class BitBucketClient {
             }
             let fileMap = problemsMap[problem.path];
             let line = problem.lineNumber || 0;
-            if(fileMap[line]){
+            if(!fileMap[line]){
               fileMap[line] = [];
             }
             fileMap[line].push(problem);
@@ -86,7 +86,7 @@ export class BitBucketClient {
    * @returns {PullRequestDetails}
    */
   private getPullRequestDetails( bitBucketPullRequestUrl?: string ): PullRequestDetails {
-    let regex = /^(?:(http[s]?|ftp):\/)?\/?([^:\/\s]+)(?:.+?)(?:projects\/(.*?)\/repos\/(.*?)\/pull-requests\/(.+?))$/;
+    let regex = /^(?:(http[s]?|ftp):\/)?\/?([^:\/\s]+)(?:.+?)(?:projects\/(.*?)\/repos\/(.*?)\/pull-requests\/(.+?)\/overview)$/;
     let match = bitBucketPullRequestUrl.match( regex );
     if ( match ) {
       return <PullRequestDetails> {
@@ -125,7 +125,7 @@ export class BitBucketClient {
             comment.anchor.lineType = 'CONTEXT';
           }
         }
-        let url     = `${details.url}/rest/api/1.0/projects/${details.group}/repo/${details.project}/pull-requests/${details.pullRequestId}/comments`;
+        let url     = `${details.url}/rest/api/1.0/projects/${details.group}/repos/${details.project}/pull-requests/${details.pullRequestId}/comments`;
         let options = {
           headers: { 'content-type': 'application/json' },
           data: JSON.stringify( comment )
