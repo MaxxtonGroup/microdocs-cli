@@ -5,6 +5,7 @@ import { Project, ProblemResponse } from "@maxxton/microdocs-core/domain";
 import * as cliHelper from '../helpers/cli.helper';
 import { ServerOptions } from "../options/server.options";
 import { CheckOptions } from "../options/check.options";
+import * as path from "path";
 
 module.exports = new Command( "check" )
     .description( "Check for problems with other projects" )
@@ -36,7 +37,7 @@ module.exports = new Command( "check" )
       } );
       let crawler                    = new MicroDocsCrawler( logger );
       crawler.check( project, checkOptions ).then( ( problemResult: ProblemResponse ) => {
-        cliHelper.printProblemResponse( problemResult, [args.options.source], logger );
+        cliHelper.printProblemResponse( problemResult, [path.resolve(process.cwd(), args.options.source)], logger );
         resolve();
       }, reject );
     } );
