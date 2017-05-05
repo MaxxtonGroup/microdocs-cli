@@ -57,7 +57,10 @@ export function printProblemResponse( response:ProblemResponse, folders:string[]
         msg += problem.level + ": " + problem.message;
       }
       if(problem.client){
-        msg += "\nBreaking change detected with " + problem.client.title + " (source: " + problem.client.sourceLink ? problem.client.sourceLink : problem.client.className + " )";
+        msg += "\nBreaking change detected with " + problem.client.title;
+        if(problem.client.sourceLink || problem.client.className){
+          msg += " (source: " + (problem.client.sourceLink ? problem.client.sourceLink : problem.client.className) + ")";
+        }
       }
       if(hasProblems){
         logger.warn(msg);
@@ -73,7 +76,10 @@ export function printProblemResponse( response:ProblemResponse, folders:string[]
 export function formatProblemMessage(problem:Problem):string{
   let msg = problem.level + ': ' + problem.message;
   if(problem.client){
-    msg += "\nBreaking change detected with " + problem.client.title + " (source: " + problem.client.sourceLink ? problem.client.sourceLink : problem.client.className + " )";
+    msg += "\nBreaking change detected with " + problem.client.title;
+    if(problem.client.sourceLink || problem.client.className){
+      msg += " (source: " + (problem.client.sourceLink ? problem.client.sourceLink : problem.client.className) + ")";
+    }
   }
   return msg;
 }
