@@ -128,7 +128,7 @@ export class MicroDocsClient {
           params[ 'env' ] = publishOptions.env;
         }
         if ( publishOptions.force ) {
-          params[ 'failOnProblems' ] = false;
+          params[ 'failOnProblems' ] = 'false';
         }
         var options = {
           parameters: params,
