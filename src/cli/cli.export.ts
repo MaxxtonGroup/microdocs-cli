@@ -15,8 +15,7 @@ import { SwaggerAdapter, PostmanAdapter, BaseAdapter } from '@maxxton/microdocs-
 module.exports = new Command("export")
   .description("Export the project definitions to different formats")
   .option('-f, --format <FORMAT>', { desc: 'The export format, e.g. swagger, postman' })
-  .option('--swaggerFile <FILE>', { desc: 'The location and filename for the Swagger definition, e.g. dist/swagger.json' })
-  .option('--postmanFile <FILE>', { desc: 'The location and filename for the Postman definition, e.g. dist/postman.json' })
+  .option('--outputFile <FILE>', { desc: 'The location and filename for the output definition, e.g. dist/swagger.json' })
   .extends(require('./cli.build'))
   .action((args: CommandArgs, resolve: (result?: any) => void, reject: (err?: any) => void) => {
     let project: Project = args.pipeResult && args.pipeResult['project'];
@@ -37,7 +36,7 @@ module.exports = new Command("export")
     let result: any = adapter.adapt(project);
 
     if (args.options['format'] == 'swagger' || args.options['format'] == 'postman') {
-      cliHelper.storeResult(result, args.options['format'], args.options.swaggerFile);
+      cliHelper.storeResult(result, args.options['format'], args.options.outputFile);
     }
 
     logger.info("Export to " + args.options['format'] + " definition succeed");
