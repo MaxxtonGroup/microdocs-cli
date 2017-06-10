@@ -24,10 +24,6 @@ module.exports = new Command( "check" )
         reject( "Project is missing" );
         return;
       }
-      if ( !serverOptions || !serverOptions.url ) {
-        reject( "Project is missing" );
-        return;
-      }
       let checkOptions: CheckOptions = Object.assign( serverOptions, {
         title: args.options.title,
         env: args.options.env,

@@ -24,7 +24,7 @@ export function dockerComposeUp( options: DockerComposeUpOptions, callback?: ( e
   if(options.cleanOrphans){
     cmd += ' --remove-orphans';
   }
-  console.info('exec: ' + cmd);
+  console.debug('exec: ' + cmd);
   return exec( cmd, execOptions, callback );
 }
 
@@ -57,7 +57,7 @@ export function dockerComposeDown( options: DockerComposeDownOptions, callback?:
   if(options.cleanOrphans){
     cmd += ' --remove-orphans';
   }
-  console.info('exec: ' + cmd);
+  console.debug('exec: ' + cmd);
   return exec( cmd, execOptions, callback );
 }
 
@@ -74,7 +74,7 @@ export function dockerComposePs(options: DockerComposePsOptions, callback?: ( er
     cwd: options.cwd
   };
   let cmd = 'docker-compose ps';
-  console.info('exec: ' + cmd);
+  console.debug('exec: ' + cmd);
   return exec( cmd, execOptions, callback );
 }
 export interface DockerComposePsOptions {

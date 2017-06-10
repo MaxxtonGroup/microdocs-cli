@@ -3,7 +3,7 @@ import { ServerOptions } from "../options/server.options";
 
 export default new Command( "login" )
     .description("Login to a MicroDocs Server")
-    .option( '-s, --url <URL>', { desc: 'Url of the MicroDocs Server', order: 50 } )
+    .option( '-s, --url <URL>', { desc: 'Url of the MicroDocs Server', order: 50, value: 'http://localhost:3000' } )
     .option( '-U, --username <USERNAME>', { desc: 'Username of the MicroDocs Server', order: 51 } )
     .option( '-P, --password <PASSWORD>', { desc: 'Password of the MicroDocs Server', order: 52 } )
     .flag('--no-credentials-store', {desc: "Don't store the credentials in the credentials store"})
@@ -23,7 +23,7 @@ export default new Command( "login" )
             noChecking: args.flags['no-checking']
         }).then((serverOptions:ServerOptions) => {
             if(!args.flags['no-checking']){
-                logger.info('Logged in!');
+                logger.debug('Logged in!');
             }
             resolve({server: serverOptions});
         }, reject);

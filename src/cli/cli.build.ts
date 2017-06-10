@@ -25,7 +25,7 @@ export default new Command( "build" )
         noCache: args.flags[ 'no-cache' ],
         noBuild: args.flags[ 'no-build' ]
       } ).then( ( project: any ) => {
-        logger.info( "Build definitions succeed" );
+        logger.debug( "Build definitions succeed" );
         resolve( {project: project} );
       }, ( err: any ) => {
         reject( err );

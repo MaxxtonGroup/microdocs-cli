@@ -34,7 +34,7 @@ export class DockerClusterService {
     let composeName: string = this.getComposeName( options );
     let clusterDir: string  = this.getClusterDir( options.clusterName );
     if ( composeName !== 'all' ) {
-      console.info( 'update docker-compose' );
+      console.debug( 'update docker-compose' );
       let composeFile: string = path.join(clusterDir, composeName + '.yml');
 
       this.removeCluster(options.clusterName, [composeFile]);
@@ -47,7 +47,7 @@ export class DockerClusterService {
   }
 
   private removeCluster(clusterName:string = 'default', composeFiles:string[]){
-    console.info( 'down docker-compose' );
+    console.debug( 'down docker-compose' );
     let clusterDir: string  = this.getClusterDir( clusterName );
     let childProcess = dockerComposeDown({cwd: clusterDir, cleanOrphans: true, removeVolume: true, composeFiles: composeFiles}, ( error: Error, stdout: string, stderr: string ) => {
       console.log( stdout );
@@ -79,7 +79,7 @@ export class DockerClusterService {
   }
 
   private updateCluster(clusterDir:string){
-    console.info( 'docker-compose up' );
+    console.debug( 'docker-compose up' );
     let composeFiles:string[] = this.getFiles(clusterDir).map(file => path.join(clusterDir, file));
     let childProcess = dockerComposeUp( {
       forceBuild: true,
@@ -103,14 +103,15 @@ export class DockerClusterService {
   }
 
   private fetchDockerCompose( options: ClusterOptions ) {
-    console.info( 'Fetch docker-compose' );
+    console.debug( 'Fetch docker-compose' );
     let microDocsClient = new MicroDocsClient(new JSLogger());
-    microDocsClient.getProjects( options, 'docker-compose', ( response: ProblemResponse|string ) => {
+    options.exportType = 'docker-compose';
+    microDocsClient.getProjects( options, ( response: ProblemResponse|string ) => {
       if ( typeof(response) === 'string' ) {
         let dockerCompose: DockerCompose = <DockerCompose>(<any>yaml).load( response );
         this.addDockerOptions( options, dockerCompose );
 
-        console.info( 'store docker-compose' );
+        console.debug( 'store docker-compose' );
         let clusterDir = this.getClusterDir( options.clusterName );
         this.storeDockerCompose( clusterDir, options, dockerCompose );
 

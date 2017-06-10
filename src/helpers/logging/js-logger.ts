@@ -1,8 +1,13 @@
 
-import {Logger} from './logger';
+import { isDebug, Logger } from './logger';
 import * as jsLogger from 'js-logger';
 
 jsLogger.useDefaults();
+if(isDebug()){
+  jsLogger.setLevel(jsLogger.DEBUG);
+}else{
+  jsLogger.setLevel(jsLogger.INFO);
+}
 
 export class JSLogger implements Logger{
 

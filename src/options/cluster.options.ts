@@ -16,5 +16,6 @@ export interface ClusterOptions extends ServerOptions{
   denv?:string[];
   dpublish?:string[];
   dvolume?:string[];
+  exportType?:string;
 
 }

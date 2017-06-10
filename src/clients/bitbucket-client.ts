@@ -130,7 +130,7 @@ export class BitBucketClient {
           headers: { 'content-type': 'application/json' },
           data: JSON.stringify( comment )
         };
-        this.logger.info( `post ${url} body(appliction/json) ${options.data}` );
+        this.logger.debug( `post ${url} body(appliction/json) ${options.data}` );
 
         client.post( url, options, ( data: any, response: any ) => {
           if ( response.statusCode == 201 ) {
@@ -171,7 +171,7 @@ export class BitBucketClient {
           headers: { 'content-type': 'application/json' },
           data: JSON.stringify( comment )
         };
-        this.logger.info( `post ${url} body(appliction/json) ${options.data}` );
+        this.logger.debug( `post ${url} body(appliction/json) ${options.data}` );
 
         client.post( url, options, ( data: any, response: any ) => {
           if ( response.statusCode == 201 ) {

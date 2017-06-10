@@ -32,7 +32,7 @@ export class MicroDocsClient {
   public login( serverOptions: ServerOptions ): Promise<boolean> {
     return new Promise( ( resolve: ( loggedIn: boolean ) => void, reject: ( err?: any ) => void ) => {
       let client: any = this.createClient( serverOptions, reject );
-      this.logger.info('GET ' + serverOptions.url);
+      this.logger.debug( 'GET ' + serverOptions.url );
       client.get( serverOptions.url, {
         requestConfig: {
           timeout: 1000, //request timeout in milliseconds
@@ -44,7 +44,7 @@ export class MicroDocsClient {
           timeout: 1000 //response timeout
         }
       }, ( data: ProblemResponse, response: any ) => {
-        this.logger.debug('Response: ' + response.statusCode);
+        this.logger.debug( 'Response: ' + response.statusCode );
         if ( response.statusCode == 200 ) {
           resolve( true );
         } else if ( response.statusCode == 401 ) {
@@ -85,13 +85,13 @@ export class MicroDocsClient {
           data: JSON.stringify( project )
         };
         let url     = checkOptions.url + '/api/v1/check';
-        this.logger.info('post ' + url);
+        this.logger.debug( 'post ' + url );
 
         client.post( url, options, ( data: ProblemResponse, response: any ) => {
           if ( response.statusCode == 200 ) {
             resolve( data );
           } else {
-            let message = "Wrong response status " + response.statusCode + ", expected 200 -> body:\n " + JSON.stringify(data);
+            let message = "Wrong response status " + response.statusCode + ", expected 200 -> body:\n " + JSON.stringify( data );
             resolve( { message: message, status: 'failed' } );
           }
         } ).on( 'error', errorHandler );
@@ -136,13 +136,13 @@ export class MicroDocsClient {
           data: JSON.stringify( project )
         };
         var url     = publishOptions.url + '/api/v1/projects/' + encodeURIComponent( publishOptions.title );
-        this.logger.info('PUT ' + url);
+        this.logger.debug( 'PUT ' + url );
 
         client.put( url, options, ( data: ProblemResponse, response: any ) => {
           if ( response.statusCode == 200 ) {
             resolve( data );
           } else {
-            var message = "Wrong response status " + response.statusCode + ", expected 200 -> body:\n " + JSON.stringify(data);
+            var message = "Wrong response status " + response.statusCode + ", expected 200 -> body:\n " + JSON.stringify( data );
             resolve( { message: message, status: 'failed' } );
           }
         } ).on( 'error', errorHandler );
@@ -152,7 +152,7 @@ export class MicroDocsClient {
     } );
   }
 
-  public getProjects( clusterOptions: ClusterOptions, exportType: string, callback: ( response: ProblemResponse ) => void ) {
+  public getProjects( clusterOptions: ClusterOptions, callback: ( response: any ) => void ) {
     var errorHandler = ( error: any ) => {
       var message = "Failed to get to " + url + " (" + error + ")";
       callback( { message: message, status: 'failed' } );
@@ -160,7 +160,10 @@ export class MicroDocsClient {
 
     var client: any = this.createClient( clusterOptions, errorHandler );
 
-    var params: any = { export: exportType };
+    var params: any = {};
+    if ( clusterOptions.exportType ) {
+      params.export = clusterOptions.exportType;
+    }
     if ( clusterOptions.env ) {
       params[ 'env' ] = clusterOptions.env;
     }
@@ -184,13 +187,24 @@ export class MicroDocsClient {
         params[ 'build-self' ] = true;
       }
     }
-    this.logger.info('get ' + url);
+    this.logger.debug( 'get ' + url );
 
-    client.get( url, options, ( data: string, response: any ) => {
+    client.get( url, options, ( data: any, response: any ) => {
       if ( response.statusCode == 200 ) {
-        callback( JSON.stringify(data));
+        if ( data instanceof Uint8Array ) {
+          data = data.toString();
+        }
+        callback( data );
       } else {
-        var message = "Wrong response status " + response.statusCode + ", expected 200 -> body:\n " + JSON.stringify(data);
+        let message: string;
+        if ( data.message ) {
+          message = data.message;
+          if ( data.error ) {
+            message = data.error + ": " + message;
+          }
+        } else {
+          message = "Wrong response status " + response.statusCode + ", expected 200 -> body:\n " + JSON.stringify( data );
+        }
         callback( { message: message, status: 'failed' } );
       }
     } ).on( 'error', errorHandler );

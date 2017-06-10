@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import {Cli} from 'command-script';
+import {Cli, Option} from 'command-script';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -21,6 +21,7 @@ cli.command(require('./cli.check'));
 cli.command(require('./cli.export'));
 cli.command(require('./cli.publish'));
 cli.command(require('./cli.login'));
+cli.command(require('./cli.get'));
 
 cli.command('help')
   .description('Show help')

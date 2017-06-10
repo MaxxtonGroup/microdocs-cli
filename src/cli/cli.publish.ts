@@ -24,10 +24,6 @@ module.exports = new Command("publish")
         reject("Project is missing");
         return;
       }
-      if(!serverOptions || !serverOptions.url){
-        reject("Project is missing");
-        return;
-      }
       let publishOptions:PublishOptions = Object.assign(serverOptions, {
         title: args.options.title,
         env: args.options.env,

@@ -72,7 +72,7 @@ export class MicroDocsCrawler {
           if ( noBuild ) {
             try {
               let project:Project = <Project>JSON.parse(<any>fs.readFileSync(absoluteDefinitionFile))
-              this.logger.info( "Skip building the MicroDocs definitions, use the '--no-cache' option to enforce this" );
+              this.logger.debug( "Skip building the MicroDocs definitions, use the '--no-cache' option to enforce this" );
               resolveMapper( project );
               return;
             } catch ( e ) {
@@ -86,7 +86,7 @@ export class MicroDocsCrawler {
               if ( newHash === hash.toString() ) {
                 try {
                   let project:Project = <Project>JSON.parse(<any>fs.readFileSync(absoluteDefinitionFile))
-                  this.logger.info( "Skip building the MicroDocs definitions, use the '--no-cache' option to enforce this" );
+                  this.logger.debug( "Skip building the MicroDocs definitions, use the '--no-cache' option to enforce this" );
                   resolveMapper( project );
                   return;
                 } catch ( e ) {
@@ -150,7 +150,7 @@ export class MicroDocsCrawler {
         }
 
         if ( definitionFile ) {
-          this.logger.info( `Store definitions in '${definitionFile}'` );
+          this.logger.debug( `Store definitions in '${definitionFile}'` );
           let hashFile         = definitionFile + '.hash';
           let json             = JSON.stringify( project );
           let definitionFolder = pathUtil.dirname( definitionFile );
@@ -215,8 +215,8 @@ export class MicroDocsCrawler {
     }
 
     // Convert source to reflection
-    this.logger.info( 'Crawl sources with config:' );
-    this.logger.info( JSON.stringify( tsConfig, undefined, 2 ) );
+    this.logger.debug( 'Crawl sources with config:' );
+    this.logger.debug( JSON.stringify( tsConfig, undefined, 2 ) );
     let typedocApplication = new Application( tsConfig );
     let reflect            = typedocApplication.convert( sources );
 
@@ -335,7 +335,7 @@ export class MicroDocsCrawler {
   private getTsConfig( tsConfigFile: string, folders: string[] ): any {
     if ( fs.existsSync( tsConfigFile ) ) {
       try {
-        this.logger.info( `Load tsConfig from '${tsConfigFile}'` );
+        this.logger.debug( `Load tsConfig from '${tsConfigFile}'` );
         var tsConfig = require( tsConfigFile );
         if ( tsConfig.compilerOptions ) {
           if ( tsConfig.compilerOptions.ignoreCompilerErrors !== false ) {
@@ -351,7 +351,7 @@ export class MicroDocsCrawler {
       let tsFile = pathUtil.join( folders[ i ] + '/' + tsConfigFile );
       if ( fs.existsSync( tsFile ) ) {
         try {
-          this.logger.info( `Load tsConfig from '${tsFile}'` );
+          this.logger.debug( `Load tsConfig from '${tsFile}'` );
           var tsConfig = require( tsFile );
           if ( tsConfig.compilerOptions ) {
             if ( tsConfig.compilerOptions.ignoreCompilerErrors !== false ) {
