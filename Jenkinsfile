@@ -1,7 +1,7 @@
 pipeline {
   agent any
   parameters {
-    choice(choices: ['patch', 'minor', 'mayor'], description: 'Increase the patch, minor, major version', name: 'SEM_VERSION')
+    choice(choices:"patch\nminor\nmajor", description: 'Increase the patch, minor, major version', name: 'SEM_VERSION')
     string(name: 'MICRODOCS_CORE_VERSION', defaultValue: '', description: 'Version of microdocs-core')
   }
 
