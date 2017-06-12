@@ -17,7 +17,7 @@ pipeline {
     stage('Build') {
       steps {
         echo "Installing npm dependencies"
-        unstash 'src'
+        unstash 'source'
         sh 'npm version ' + env.SEM_VERSION
         sh 'npm install --save @maxxton/microdocs-core@' + env.MICRODOCS_CORE_vERSION
         sh 'npm install'
