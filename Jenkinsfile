@@ -1,49 +1,57 @@
-def projectFolder = 'microdocs-cli';
-def newVersion = '';
-def semver = input message: 'Increase the patch, minor, major version', parameters: [choice(choices: "patch\nminor\nmajor", description: 'Increase the patch, minor, major version', name: 'SEM_VERSION')]
-def microdocsCoreVersion = input message: 'Version microdocs-core', parameters: [string(defaultValue: '', description: 'Version of microdocs-core', name: 'MICRODOCS_CORE_VERSION')]
-node {
-    stage('Checkout'){
+pipeline {
+  agent any
+  parameters {
+    choice(choices: ['patch', 'minor', 'mayor'], description: 'Increase the patch, minor, major version', name: 'SEM_VERSION')
+    string(name: 'MICRODOCS_CORE_VERSION', defaultValue: '', description: 'Version of microdocs-core')
+  }
+
+  stages {
+    stage("Checkout") {
+      steps {
         deleteDir()
-        echo "Checkout git"
-        checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/MaxxtonGroup/microdocs-cli', branch: 'master']]])
-        stash name: 'src'
-    }
-    stage('Build'){
-        echo "Installing npm dependencies"
-        unstash 'src'
-        newVersion = sh(returnStdout: true, script: 'npm version ' + semver).trim()
-        sh 'npm install --save @maxxton/microdocs-core@' + microdocsCoreVersion
-        sh 'npm install'
-        stash name: 'build'
+        checkout scm
+        stash name: 'source'
+      }
     }
 
-    stage('Test'){
+    stage('Build') {
+      steps {
+        echo "Installing npm dependencies"
+        unstash 'src'
+        sh 'npm version ' + env.SEM_VERSION
+        sh 'npm install --save @maxxton/microdocs-core@' + env.MICRODOCS_CORE_vERSION
+        sh 'npm install'
+        stash name: 'build'
+      }
+    }
+
+    stage('Test') {
+      steps {
         echo "Test"
         unstash 'build'
         sh 'npm test'
+      }
     }
 
-    stage('PrePublish'){
+    stage('PrePublish') {
+      steps {
         echo "PrePublish"
         unstash 'build'
         sh 'npm run prepublish'
-        dir('dist'){
-            stash 'dist'
+        dir('dist') {
+          stash 'dist'
         }
+      }
     }
-
-//    stage('Git Tag'){
-//        sh 'git push'
-//        sh 'git push origin ' + projectName + '_' + newVersion
-//    }
-
-    stage('Publish'){
-        dir('dist'){
-            echo "Publish"
-            unstash 'dist'
-            sh 'echo @maxxton:registry=https://npm.maxxton.com > .npmrc'
-            sh 'npm publish'
+    stage('Publish') {
+      steps {
+        dir('dist') {
+          echo "Publish"
+          unstash 'dist'
+          sh 'echo @maxxton:registry=https://npm.maxxton.com > .npmrc'
+          sh 'npm publish'
         }
+      }
     }
+  }
 }
