@@ -1,0 +1,17 @@
+version: '3'
+services:
+  microdocs-cli:
+    build:
+      context: ../
+      dockerfile: ./microdocs-cli/Dockerfile
+    ports:
+     - 3000:3000
+     - 5858:5858
+    volumes:
+     - ../../microdocs-core/dist/adapter:/app/@maxxton/microdocs-core/dist/adapter
+     - ../../microdocs-core/dist/builder:/app/@maxxton/microdocs-core/dist/builder
+     - ../../microdocs-core/dist/domain:/app/@maxxton/microdocs-core/dist/domain
+     - ../../microdocs-core/dist/helpers:/app/@maxxton/microdocs-core/dist/helpers
+     - ../../microdocs-core/dist/pre-processor:/app/@maxxton/microdocs-core/dist/pre-processor
+     - ./src:/app/@maxxton/microdocs-cli/src:ro
+     - ./dist:/app/@maxxton/microdocs-cli/dist
