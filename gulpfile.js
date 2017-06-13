@@ -1,7 +1,7 @@
 'use strict';
 var gulp = require('gulp');
 var tscConfig = require('./src/tsconfig.json');
-var Builder = require('./node_modules/@maxxton/microdocs-core/build').Builder;
+var Builder = require('./build').Builder;
 
 var settings = {
   distFolder: 'dist',
