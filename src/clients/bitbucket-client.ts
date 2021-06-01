@@ -33,9 +33,9 @@ export class BitBucketClient {
       let client: any = this.createClient( checkOptions, reject );
       let details     = this.getPullRequestDetails( checkOptions.bitBucketPullRequestUrl );
       if ( problemResponse.problems ) {
-        let promissen:Promise<number>[] = [];
+        let promisses:Promise<number>[] = [];
         let problemsMap: { [file: string]: { [line: number]: Problem[] } } = {};
-        problemResponse.problems.forEach(problem => {
+        problemResponse.problems.forEach((problem: Problem) => {
           if(problem.path){
             if(!problemsMap[problem.path]){
               problemsMap[problem.path] = {};
@@ -47,7 +47,7 @@ export class BitBucketClient {
             }
             fileMap[line].push(problem);
           }else{
-            promissen.push(this.postPullRequestComment(client, details, formatProblemMessage(problem)));
+            promisses.push(this.postPullRequestComment(client, details, formatProblemMessage(problem)));
           }
         });
         for(let file in problemsMap){
@@ -62,7 +62,7 @@ export class BitBucketClient {
             }).join('\n');
             let lineNumber:number = parseInt(line);
             let promise = this.postPullRequestComment(client, details, comment, file, lineNumber);
-            promissen.push(new Promise((resolve:()=>void,reject:(err?:any) => void) => {
+            promisses.push(new Promise((resolve:(value: any)=>void,reject:(err?:any) => void) => {
               promise.then((commentId:number) => {
                 Promise.all(problemList.map(problem => {
                   return this.postTask(client, details, problem.message, commentId);
@@ -71,7 +71,7 @@ export class BitBucketClient {
             }));
           }
         }
-        Promise.all(promissen).then(() => {
+        Promise.all(promisses).then(() => {
           resolve(problemResponse);
         }, reject);
       } else {

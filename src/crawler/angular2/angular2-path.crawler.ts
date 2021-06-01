@@ -1,15 +1,14 @@
 import { PathCrawler } from "../common/abstract/path.crawler";
-import { ProjectReflection } from "@maxxton/typedoc";
+import { ProjectReflection } from "typedoc";
 import {
   ContainerReflection,
   DeclarationReflection,
-  IDecorator,
+  Decorator,
   ParameterReflection,
   SignatureReflection,
   ReferenceType,
-  IntrinsicType,
   Type
-} from "@maxxton/typedoc/dist/lib/models";
+} from "typedoc/dist/lib/models";
 import { PathBuilder } from "@maxxton/microdocs-core/builder";
 import * as helper from "../common/helpers/crawler.helper";
 import { Parameter, ParameterPlacings } from "@maxxton/microdocs-core/domain";
@@ -74,27 +73,27 @@ export class Angular2PathCrawler extends PathCrawler {
     }
   }
 
-  private filterRequestMethodDecorators( decorator: IDecorator ): boolean {
+  private filterRequestMethodDecorators( decorator: Decorator ): boolean {
     return HTTP_METHODS.filter( method => method === decorator.name.toLowerCase() ).length > 0;
   }
 
-  private crawlPathParam( param: ParameterReflection, decorator: IDecorator, signature: SignatureReflection, modelCollector: ModelCollector ): Parameter {
+  private crawlPathParam( param: ParameterReflection, decorator: Decorator, signature: SignatureReflection, modelCollector: ModelCollector ): Parameter {
     let parameter = this.buildParam( param, ParameterPlacings.PATH, decorator, signature, modelCollector );
     return parameter;
   }
 
-  private crawlQueryParam( param: ParameterReflection, decorator: IDecorator, signature: SignatureReflection, modelCollector: ModelCollector ): Parameter {
+  private crawlQueryParam( param: ParameterReflection, decorator: Decorator, signature: SignatureReflection, modelCollector: ModelCollector ): Parameter {
     let parameter = this.buildParam( param, ParameterPlacings.QUERY, decorator, signature, modelCollector );
     return parameter;
   }
 
-  private crawlBodyParam( param: ParameterReflection, decorator: IDecorator, signature: SignatureReflection, modelCollector: ModelCollector ): Parameter {
+  private crawlBodyParam( param: ParameterReflection, decorator: Decorator, signature: SignatureReflection, modelCollector: ModelCollector ): Parameter {
     let parameter  = this.buildParam( param, ParameterPlacings.BODY, decorator, signature, modelCollector );
     parameter.name = 'body';
     return parameter;
   }
 
-  private buildParam( param: ParameterReflection, placing: string, decorator: IDecorator, signature: SignatureReflection, modelCollector: ModelCollector ): Parameter {
+  private buildParam( param: ParameterReflection, placing: string, decorator: Decorator, signature: SignatureReflection, modelCollector: ModelCollector ): Parameter {
     let parameter: Parameter = {};
     if ( decorator.arguments && decorator.arguments.name ) {
       parameter.name = helper.evalArgument( decorator.arguments.name );

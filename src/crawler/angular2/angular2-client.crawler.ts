@@ -1,7 +1,7 @@
-import {ContainerReflection} from "@maxxton/typedoc/dist/lib/models";
+import {ContainerReflection} from "typedoc/dist/lib/models";
 import {DependencyBuilder, PathBuilder} from '@maxxton/microdocs-core/builder/index';
 import {ClientCrawler} from "../common/abstract/client.crawler";
-import {ProjectReflection} from "@maxxton/typedoc";
+import {ProjectReflection} from "typedoc";
 import * as helper from '../common/helpers/crawler.helper';
 
 export class Angular2ClientCrawler extends ClientCrawler{

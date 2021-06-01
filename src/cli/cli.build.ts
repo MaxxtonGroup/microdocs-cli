@@ -1,5 +1,4 @@
 import { Command } from 'command-script';
-import { SchemaHelper } from "@maxxton/microdocs-core/helpers";
 
 export default new Command( "build" )
     .description( "Build a MicroDocs definitions from source files" )

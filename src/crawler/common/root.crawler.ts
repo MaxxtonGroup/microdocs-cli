@@ -1,5 +1,5 @@
-import {ProjectReflection} from "@maxxton/typedoc";
-import {ReflectionKind, ContainerReflection, DeclarationReflection} from "@maxxton/typedoc/dist/lib/models";
+import {ProjectReflection} from "typedoc";
+import {ReflectionKind, ContainerReflection, DeclarationReflection} from "typedoc/dist/lib/models";
 import {AbstractCrawler} from "./abstract/abstract.crawler";
 import {ControllerCrawler} from "./abstract/controller.crawler";
 import {ClassCrawler} from "./abstract/class.crawler";
@@ -84,7 +84,7 @@ export class RootCrawler {
     if(declaration.children){
       declaration.children.forEach(child => {
         switch (child.kind) {
-          case ReflectionKind.ExternalModule:
+          case ReflectionKind.SomeModule:
             this.collectClasses(child, flatMap);
             break;
           case ReflectionKind.Interface:
