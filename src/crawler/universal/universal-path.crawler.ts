@@ -1,9 +1,9 @@
 import {PathCrawler} from "../common/abstract/path.crawler";
-import {ProjectReflection} from "@maxxton/typedoc";
+import {ProjectReflection} from "typedoc";
 import {
   ContainerReflection, DeclarationReflection, SignatureReflection, ParameterReflection,
   CommentTag
-} from "@maxxton/typedoc/dist/lib/models";
+} from "typedoc/dist/lib/models";
 import {PathBuilder} from '@maxxton/microdocs-core/builder';
 import {Parameter, SchemaTypes, ParameterPlacings, Schema, ResponseModel} from '@maxxton/microdocs-core/domain';
 import {HTTP_METHODS} from "../common/domain/http-methods";

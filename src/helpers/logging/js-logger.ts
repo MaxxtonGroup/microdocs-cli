@@ -1,6 +1,7 @@
 
 import { isDebug, Logger } from './logger';
-import * as jsLogger from 'js-logger';
+import jsLogger from "js-logger";
+
 
 jsLogger.useDefaults();
 if(isDebug()){

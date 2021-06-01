@@ -3,7 +3,7 @@ Command line interface for MicroDocs
 
 ## Install
 ```
-echo @maxxton:registry=https://npm.maxxton.com > ~/.npmrc
+echo @maxxton:registry=https://nexus-mxtf.maxxton.com/repository/npm-registry/ > ~/.npmrc
 npm install -g @maxxton/microdocs-cli
 ```
 
@@ -30,5 +30,10 @@ npm run test
 ```
 ### Build
 ```
-npm run prepublish
+npm run build
+```
+
+### Publish
+```
+npm publish dist --registry https://nexus-mxtf.maxxton.com/repository/npm-registry/
 ```

@@ -162,7 +162,10 @@ export class MicroDocsCrawler {
               fs.writeFileSync( definitionFile, json );
             } catch ( e ) {
               try {
-                fs.unlink( hashFile );
+
+                fs.unlink( hashFile, (err) => {
+                  if (err) throw err;
+                });
               } catch ( ee ) {
               }
               throw e;
@@ -176,7 +179,9 @@ export class MicroDocsCrawler {
                   fs.writeFileSync( definitionFile, json );
                 } catch ( e ) {
                   try {
-                    fs.unlink( hashFile );
+                    fs.unlink( hashFile, (err) => {
+                      if (err) throw err;
+                    });
                   } catch ( ee ) {
                   }
                   throw e;
@@ -206,7 +211,7 @@ export class MicroDocsCrawler {
    * @returns {Project} MicroDocs definition
    */
   private buildProject( sources: string[], tsConfig: {} = {}, frameworks: Framework[] = FRAMEWORKS ): Project {
-    const Application = require( "@maxxton/typedoc" ).Application;
+    const Application = require( "typedoc" ).Application;
     const RootCrawler = require( "./common/root.crawler" ).RootCrawler;
 
     // Check frameworks

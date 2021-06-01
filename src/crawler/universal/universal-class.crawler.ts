@@ -1,7 +1,7 @@
 import { ClassCrawler } from "../common/abstract/class.crawler";
 import { ClassIdentity } from "../common/domain/class-identity";
-import { ProjectReflection } from "@maxxton/typedoc";
-import { ContainerReflection } from "@maxxton/typedoc/dist/lib/models";
+import { ProjectReflection } from "typedoc";
+import { ContainerReflection } from "typedoc/dist/lib/models";
 import { ProjectBuilder, DependencyBuilder } from "@maxxton/microdocs-core/builder";
 import { DependencyTypes } from "@maxxton/microdocs-core/domain";
 

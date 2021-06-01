@@ -19,27 +19,12 @@
     "noImplicitReturns": true,
     "noImplicitUseStrict": false,
     "noFallthroughCasesInSwitch": true,
-    "typeRoots": [
-      "../node_modules/@types"
-    ],
-    "types": [
-    "chai",
-    "fs-extra",
-    "handlebars",
-    "highlight.js",
-    "jasmine",
-    "lodash",
-    "marked",
-    "minimatch",
-    "mkdirp",
-    "node",
-    "shelljs"
-    ]
+    "strictNullChecks": false,
+    "outDir": "../dist"
   },
   "exclude": [
-    "./node_modules",
-    "src/config",
-    "node-yaml-config"
+    "node_modules",
+    "**/*.spec.ts"
   ],
   "compileOnSave": false
 }
